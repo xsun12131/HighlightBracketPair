@@ -64,6 +64,9 @@ public class DefaultBraceHighlighter extends BraceHighlighter {
     @Override
     public List<Pair<IElementType, IElementType>> getSupportedBraceToken() {
         Language language = this.psiFile.getLanguage();
+        if(language.getID().equals("Vue")) {
+            language = Language.findLanguageByID("VueJS");
+        }
         List<Pair<IElementType, IElementType>> braceList = LanguageBracePairs.get(language);
         return braceList == null ? super.getSupportedBraceToken() : braceList;
     }

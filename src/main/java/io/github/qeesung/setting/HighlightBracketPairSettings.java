@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 @State(
         name = "HighlightBracketPairSettings",
         storages = {
-                @Storage(id = "highlight-bracket-pair", file = "$APP_CONFIG$/highlight-bracket-pair-plugin.xml")
+                @Storage(value = "$APP_CONFIG$/highlight-bracket-pair-plugin.xml")
         }
 )
 public class HighlightBracketPairSettings
