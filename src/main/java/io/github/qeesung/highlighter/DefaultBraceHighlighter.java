@@ -5,7 +5,15 @@ import com.intellij.lang.Language;
 import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.lang.PairedBraceMatcher;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter;
+import com.intellij.openapi.editor.highlighter.EditorHighlighter;
+import com.intellij.openapi.editor.highlighter.HighlighterIterator;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.xml.IXmlLeafElementType;
+import com.intellij.psi.xml.XmlTokenType;
+import com.intellij.xml.impl.XmlBraceMatcher;
+import io.github.qeesung.plugins.VueSupportedToken;
+import io.github.qeesung.plugins.XmlSupportedToken;
 import io.github.qeesung.util.Pair;
 
 import java.util.*;
@@ -21,6 +29,40 @@ public class DefaultBraceHighlighter extends BraceHighlighter {
      * Get all the registered languages' brace pairs and cache it.
      */
     static {
+        refresh();
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param editor editor
+     */
+    public DefaultBraceHighlighter(Editor editor) {
+        super(editor);
+    }
+
+    /**
+     * Get all cached supported brace token pair.
+     *
+     * @return all supported brace pair token
+     */
+    @Override
+    public List<Pair<IElementType, IElementType>> getSupportedBraceToken() {
+        Language language = this.psiFile.getLanguage();
+        List<Pair<IElementType, IElementType>> braceList = LanguageBracePairs.get(language);
+        return braceList == null ? customSupportedBraceToken(language) : braceList;
+    }
+
+    private List<Pair<IElementType, IElementType>> customSupportedBraceToken(Language language) {
+        refresh();
+        new XmlSupportedToken().addSupported(LanguageBracePairs);
+        new VueSupportedToken().addSupported(LanguageBracePairs);
+        List<Pair<IElementType, IElementType>> braceList = LanguageBracePairs.get(language);
+        return braceList == null ? super.getSupportedBraceToken() : braceList;
+    }
+
+    private static void refresh () {
         Collection<Language> languageList = Language.getRegisteredLanguages();
         for (Language language :
                 languageList) {
@@ -47,27 +89,4 @@ public class DefaultBraceHighlighter extends BraceHighlighter {
         }
     }
 
-    /**
-     * Constructor.
-     *
-     * @param editor editor
-     */
-    public DefaultBraceHighlighter(Editor editor) {
-        super(editor);
-    }
-
-    /**
-     * Get all cached supported brace token pair.
-     *
-     * @return all supported brace pair token
-     */
-    @Override
-    public List<Pair<IElementType, IElementType>> getSupportedBraceToken() {
-        Language language = this.psiFile.getLanguage();
-        if(language.getID().equals("Vue")) {
-            language = Language.findLanguageByID("VueJS");
-        }
-        List<Pair<IElementType, IElementType>> braceList = LanguageBracePairs.get(language);
-        return braceList == null ? super.getSupportedBraceToken() : braceList;
-    }
 }

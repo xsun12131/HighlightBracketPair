@@ -1,8 +1,12 @@
 package io.github.qeesung.adapter;
 
+import com.intellij.codeInsight.highlighting.BraceMatcher;
+import com.intellij.codeInsight.highlighting.BraceMatchingUtil;
 import com.intellij.openapi.editor.highlighter.HighlighterIterator;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.xml.XmlTokenType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -57,8 +61,7 @@ public class BraceMatchingUtilAdapter {
         Stack<IElementType> braceStack = new Stack<>();
         for (; !iterator.atEnd(); iterator.retreat()) {
             final IElementType tokenType = iterator.getTokenType();
-
-            if (isLBraceToken(iterator, fileText, fileType)) {
+            if (isLBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
                 if (!isBlockCaret && initOffset == iterator.getStart())
                     continue;
                 if (!braceStack.isEmpty()) {
@@ -73,7 +76,7 @@ public class BraceMatchingUtilAdapter {
                         break;
                     }
                 }
-            } else if (isRBraceToken(iterator, fileText, fileType)) {
+            } else if (isRBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
                 if (initOffset == iterator.getStart())
                     continue;
                 braceStack.push(iterator.getTokenType());
@@ -101,8 +104,7 @@ public class BraceMatchingUtilAdapter {
         Stack<IElementType> braceStack = new Stack<>();
         for (; !iterator.atEnd(); iterator.advance()) {
             final IElementType tokenType = iterator.getTokenType();
-
-            if (isRBraceToken(iterator, fileText, fileType)) {
+            if (isRBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
                 if (!braceStack.isEmpty()) {
                     IElementType topToken = braceStack.pop();
                     if (!isPairBraces(tokenType, topToken, fileType)) {
@@ -115,7 +117,7 @@ public class BraceMatchingUtilAdapter {
                         break;
                     }
                 }
-            } else if (isLBraceToken(iterator, fileText, fileType)) {
+            } else if (isLBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
                 if (isBlockCaret && initOffset == iterator.getStart())
                     continue;
                 else
@@ -125,4 +127,10 @@ public class BraceMatchingUtilAdapter {
 
         return lastRbraceOffset;
     }
+
+    private static boolean customCheck(IElementType tokenType) {
+        return !tokenType.equals(XmlTokenType.XML_ATTRIBUTE_VALUE_START_DELIMITER) &&
+                !tokenType.equals(XmlTokenType.XML_ATTRIBUTE_VALUE_END_DELIMITER);
+    }
+
 }

@@ -1,5 +1,6 @@
 package io.github.qeesung.highlighter;
 
+import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -16,9 +17,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.xml.XmlTokenType;
 import io.github.qeesung.adapter.BraceMatchingUtilAdapter;
 import io.github.qeesung.brace.Brace;
 import io.github.qeesung.brace.BracePair;
+import io.github.qeesung.plugins.XmlSupportedToken;
 import io.github.qeesung.setting.HighlightBracketPairSettingsPage;
 import io.github.qeesung.util.Pair;
 
@@ -72,11 +75,24 @@ abstract public class BraceHighlighter {
                 braceTokens) {
             HighlighterIterator leftTraverseIterator = editorHighlighter.createIterator(offset);
             HighlighterIterator rightTraverseIterator = editorHighlighter.createIterator(offset);
+
             int leftBraceOffset = BraceMatchingUtilAdapter.findLeftLParen(
                     leftTraverseIterator, braceTokenPair.getLeft(), this.fileText, this.fileType, isBlockCaret);
             int rightBraceOffset = BraceMatchingUtilAdapter.findRightRParen(
                     rightTraverseIterator, braceTokenPair.getRight(), this.fileText, this.fileType, isBlockCaret);
             if (leftBraceOffset != NON_OFFSET && rightBraceOffset != NON_OFFSET) {
+                if(braceTokenPair.getRight().equals(XmlTokenType.XML_TAG_END)) {
+                    HighlighterIterator leftIterator = editorHighlighter.createIterator(leftBraceOffset);
+                    HighlighterIterator rightIterator = editorHighlighter.createIterator(rightBraceOffset);
+                    String leftText = XmlSupportedToken.getLeftPart(leftBraceOffset, leftIterator);
+                    String rightText = XmlSupportedToken.getRightPart(rightBraceOffset + 1, rightIterator);
+                    return new BracePair.BracePairBuilder().
+                            leftType(braceTokenPair.getLeft()).
+                            rightType(braceTokenPair.getRight()).
+                            leftText(leftText).rightText(rightText).
+                            leftOffset(leftBraceOffset).
+                            rightOffset(rightBraceOffset - rightText.length() + 1).build();
+                }
                 return new BracePair.BracePairBuilder().
                         leftType(braceTokenPair.getLeft()).
                         rightType(braceTokenPair.getRight()).
