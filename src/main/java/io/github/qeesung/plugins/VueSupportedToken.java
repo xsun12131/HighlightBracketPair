@@ -8,11 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class VueSupportedToken implements CustomSupportedToken {
+public class VueSupportedToken extends CustomSupportedToken {
 
     @Override
     public Map<Language, List<Pair<IElementType, IElementType>>> addSupported(Map<Language, List<Pair<IElementType, IElementType>>> map) {
         Language vue = Language.findLanguageByID("Vue");
+        if (vue == null) {
+            return map;
+        }
         List<Pair<IElementType, IElementType>> vueJsPairList = map.get(Language.findLanguageByID("VueJS"));
         List<Pair<IElementType, IElementType>> xmlPairList = map.get(Language.findLanguageByID("XML"));
         List<Pair<IElementType, IElementType>> cssPairList = map.get(Language.findLanguageByID("CSS"));
@@ -23,4 +26,24 @@ public class VueSupportedToken implements CustomSupportedToken {
         map.put(vue, vuePairList);
         return map;
     }
+
+    public enum Singleton {
+
+        INSTANCE;
+
+        private VueSupportedToken vueSupportedToken;
+
+        Singleton() {
+            vueSupportedToken = new VueSupportedToken();
+        }
+
+        public VueSupportedToken getInstance() {
+            return vueSupportedToken;
+        }
+
+        public Map<Language, List<Pair<IElementType, IElementType>>> addSupported(Map<Language, List<Pair<IElementType, IElementType>>> map) {
+            return vueSupportedToken.addSupported(map);
+        }
+    }
+
 }

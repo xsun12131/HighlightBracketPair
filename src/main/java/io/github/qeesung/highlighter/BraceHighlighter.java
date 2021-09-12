@@ -1,6 +1,5 @@
 package io.github.qeesung.highlighter;
 
-import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -14,6 +13,7 @@ import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
@@ -60,7 +60,6 @@ abstract public class BraceHighlighter {
     }
 
     /**
-     *
      * @return
      */
     public List<Pair<IElementType, IElementType>> getSupportedBraceToken() {
@@ -81,17 +80,32 @@ abstract public class BraceHighlighter {
             int rightBraceOffset = BraceMatchingUtilAdapter.findRightRParen(
                     rightTraverseIterator, braceTokenPair.getRight(), this.fileText, this.fileType, isBlockCaret);
             if (leftBraceOffset != NON_OFFSET && rightBraceOffset != NON_OFFSET) {
-                if(braceTokenPair.getRight().equals(XmlTokenType.XML_TAG_END)) {
+                if (braceTokenPair.getRight().equals(XmlTokenType.XML_TAG_END)) {
                     HighlighterIterator leftIterator = editorHighlighter.createIterator(leftBraceOffset);
                     HighlighterIterator rightIterator = editorHighlighter.createIterator(rightBraceOffset);
-                    String leftText = XmlSupportedToken.getLeftPart(leftBraceOffset, leftIterator);
-                    String rightText = XmlSupportedToken.getRightPart(rightBraceOffset + 1, rightIterator);
+                    String leftText = XmlSupportedToken.getLeftPartOnlyName(leftBraceOffset, leftIterator);
+                    String rightText = XmlSupportedToken.getRightPart(rightBraceOffset + 1, rightIterator, leftBraceOffset);
                     return new BracePair.BracePairBuilder().
                             leftType(braceTokenPair.getLeft()).
                             rightType(braceTokenPair.getRight()).
-                            leftText(leftText).rightText(rightText).
+                            leftText(leftText)
+                            .rightText(rightText).
                             leftOffset(leftBraceOffset).
                             rightOffset(rightBraceOffset - rightText.length() + 1).build();
+                }
+                if (braceTokenPair.getRight().equals(XmlTokenType.XML_EMPTY_ELEMENT_END)) {
+                    HighlighterIterator leftIterator = editorHighlighter.createIterator(leftBraceOffset);
+                    String leftText = XmlSupportedToken.getLeftPartOnlyName(leftBraceOffset, leftIterator);
+                    String rightText = document.getText(new TextRange(rightTraverseIterator.getStart(),
+                            rightTraverseIterator.getEnd()));
+                    return new BracePair.BracePairBuilder().
+                            leftType(braceTokenPair.getLeft()).
+                            rightType(braceTokenPair.getRight()).
+                            leftText(leftText)
+                            .rightText(rightText).
+                            leftOffset(leftBraceOffset).
+                            rightOffset(rightTraverseIterator.getStart())
+                            .build();
                 }
                 return new BracePair.BracePairBuilder().
                         leftType(braceTokenPair.getLeft()).

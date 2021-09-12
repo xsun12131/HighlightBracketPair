@@ -17,13 +17,14 @@ import io.github.qeesung.plugins.XmlSupportedToken;
 import io.github.qeesung.util.Pair;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default Brace Highlighter to highlight all supported brace pair.
  */
 public class DefaultBraceHighlighter extends BraceHighlighter {
     public static Map<Language, List<Pair<IElementType, IElementType>>>
-            LanguageBracePairs = new HashMap<>();
+            LanguageBracePairs = new ConcurrentHashMap<>();
 
     /**
      * Get all the registered languages' brace pairs and cache it.
@@ -56,8 +57,8 @@ public class DefaultBraceHighlighter extends BraceHighlighter {
 
     private List<Pair<IElementType, IElementType>> customSupportedBraceToken(Language language) {
         refresh();
-        new XmlSupportedToken().addSupported(LanguageBracePairs);
-        new VueSupportedToken().addSupported(LanguageBracePairs);
+        XmlSupportedToken.Singleton.INSTANCE.addSupported(LanguageBracePairs);
+        VueSupportedToken.Singleton.INSTANCE.addSupported(LanguageBracePairs);
         List<Pair<IElementType, IElementType>> braceList = LanguageBracePairs.get(language);
         return braceList == null ? super.getSupportedBraceToken() : braceList;
     }

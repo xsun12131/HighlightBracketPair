@@ -1,12 +1,9 @@
 package io.github.qeesung.adapter;
 
-import com.intellij.codeInsight.highlighting.BraceMatcher;
-import com.intellij.codeInsight.highlighting.BraceMatchingUtil;
 import com.intellij.openapi.editor.highlighter.HighlighterIterator;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.xml.XmlTokenType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +32,7 @@ public class BraceMatchingUtilAdapter {
 
     /**
      * check is the current token type is string token.
+     *
      * @param tokenType token type
      * @return is string token
      */
@@ -46,10 +44,10 @@ public class BraceMatchingUtilAdapter {
     /**
      * Find the left closest brace offset position.
      *
-     * @param iterator highlighter iterator
+     * @param iterator        highlighter iterator
      * @param lparenTokenType left token type to be paired
-     * @param fileText file text
-     * @param fileType file type
+     * @param fileText        file text
+     * @param fileType        file type
      * @return offset
      */
     public static int findLeftLParen(HighlighterIterator iterator,
@@ -61,7 +59,7 @@ public class BraceMatchingUtilAdapter {
         Stack<IElementType> braceStack = new Stack<>();
         for (; !iterator.atEnd(); iterator.retreat()) {
             final IElementType tokenType = iterator.getTokenType();
-            if (isLBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
+            if (isLBraceToken(iterator, fileText, fileType)) {
                 if (!isBlockCaret && initOffset == iterator.getStart())
                     continue;
                 if (!braceStack.isEmpty()) {
@@ -76,7 +74,7 @@ public class BraceMatchingUtilAdapter {
                         break;
                     }
                 }
-            } else if (isRBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
+            } else if (isRBraceToken(iterator, fileText, fileType)) {
                 if (initOffset == iterator.getStart())
                     continue;
                 braceStack.push(iterator.getTokenType());
@@ -89,10 +87,10 @@ public class BraceMatchingUtilAdapter {
     /**
      * find the right closest brace offset position
      *
-     * @param iterator highlight iterator
+     * @param iterator        highlight iterator
      * @param rparenTokenType right token type to paired
-     * @param fileText file text
-     * @param fileType file type
+     * @param fileText        file text
+     * @param fileType        file type
      * @return offset
      */
     public static int findRightRParen(HighlighterIterator iterator,
@@ -104,7 +102,7 @@ public class BraceMatchingUtilAdapter {
         Stack<IElementType> braceStack = new Stack<>();
         for (; !iterator.atEnd(); iterator.advance()) {
             final IElementType tokenType = iterator.getTokenType();
-            if (isRBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
+            if (isRBraceToken(iterator, fileText, fileType)) {
                 if (!braceStack.isEmpty()) {
                     IElementType topToken = braceStack.pop();
                     if (!isPairBraces(tokenType, topToken, fileType)) {
@@ -117,7 +115,7 @@ public class BraceMatchingUtilAdapter {
                         break;
                     }
                 }
-            } else if (isLBraceToken(iterator, fileText, fileType) && customCheck(tokenType)) {
+            } else if (isLBraceToken(iterator, fileText, fileType)) {
                 if (isBlockCaret && initOffset == iterator.getStart())
                     continue;
                 else
@@ -126,11 +124,6 @@ public class BraceMatchingUtilAdapter {
         }
 
         return lastRbraceOffset;
-    }
-
-    private static boolean customCheck(IElementType tokenType) {
-        return !tokenType.equals(XmlTokenType.XML_ATTRIBUTE_VALUE_START_DELIMITER) &&
-                !tokenType.equals(XmlTokenType.XML_ATTRIBUTE_VALUE_END_DELIMITER);
     }
 
 }
