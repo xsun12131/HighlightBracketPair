@@ -18,7 +18,7 @@ import java.util.List;
  * Highlight editor component to highlight the most left brace
  * and most right brace when the current caret is change.
  */
-public class HighlightEditorComponent implements CaretListener {
+public class HighlightEditorListener implements CaretListener {
     private final Editor editor;
     private List<RangeHighlighter> highlighterList = new ArrayList<>();
     private ExtraHighlightTrigger extraHighlightTrigger;
@@ -32,9 +32,9 @@ public class HighlightEditorComponent implements CaretListener {
         private static char VIM_INSERT_KEY = 'i';
 
         private final Editor editor;
-        private HighlightEditorComponent highlightEditorComponent;
+        private HighlightEditorListener highlightEditorComponent;
 
-        public ExtraHighlightTrigger(HighlightEditorComponent component) {
+        public ExtraHighlightTrigger(HighlightEditorListener component) {
             this.editor = component.getEditor();
             this.highlightEditorComponent = component;
         }
@@ -62,7 +62,7 @@ public class HighlightEditorComponent implements CaretListener {
         }
     }
 
-    public HighlightEditorComponent(Editor editor) {
+    public HighlightEditorListener(Editor editor) {
         this.editor = editor;
         this.extraHighlightTrigger = new ExtraHighlightTrigger(this);
         this.editor.getContentComponent().addKeyListener(this.extraHighlightTrigger);

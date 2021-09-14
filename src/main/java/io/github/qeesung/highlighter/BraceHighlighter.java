@@ -18,9 +18,10 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.xml.XmlTokenType;
-import io.github.qeesung.adapter.BraceMatchingUtilAdapter;
+import io.github.qeesung.adapter.BraceMatchingUtil;
 import io.github.qeesung.brace.Brace;
 import io.github.qeesung.brace.BracePair;
+import io.github.qeesung.brace.BraceTokenTypes;
 import io.github.qeesung.plugins.XmlSupportedToken;
 import io.github.qeesung.setting.HighlightBracketPairSettingsPage;
 import io.github.qeesung.util.Pair;
@@ -75,10 +76,10 @@ abstract public class BraceHighlighter {
             HighlighterIterator leftTraverseIterator = editorHighlighter.createIterator(offset);
             HighlighterIterator rightTraverseIterator = editorHighlighter.createIterator(offset);
 
-            int leftBraceOffset = BraceMatchingUtilAdapter.findLeftLParen(
-                    leftTraverseIterator, braceTokenPair.getLeft(), this.fileText, this.fileType, isBlockCaret);
-            int rightBraceOffset = BraceMatchingUtilAdapter.findRightRParen(
-                    rightTraverseIterator, braceTokenPair.getRight(), this.fileText, this.fileType, isBlockCaret);
+            int leftBraceOffset = BraceMatchingUtil.findLeftLParen(
+                    leftTraverseIterator, braceTokenPair.getLeft(), this.fileText, this.fileType, isBlockCaret, offset);
+            int rightBraceOffset = BraceMatchingUtil.findRightRParen(
+                    rightTraverseIterator, braceTokenPair.getRight(), this.fileText, this.fileType, isBlockCaret, offset);
             if (leftBraceOffset != NON_OFFSET && rightBraceOffset != NON_OFFSET) {
                 if (braceTokenPair.getRight().equals(XmlTokenType.XML_TAG_END)) {
                     HighlighterIterator leftIterator = editorHighlighter.createIterator(leftBraceOffset);
@@ -101,10 +102,22 @@ abstract public class BraceHighlighter {
                     return new BracePair.BracePairBuilder().
                             leftType(braceTokenPair.getLeft()).
                             rightType(braceTokenPair.getRight()).
-                            leftText(leftText)
-                            .rightText(rightText).
+                            leftText(leftText).
+                            rightText(rightText).
                             leftOffset(leftBraceOffset).
                             rightOffset(rightTraverseIterator.getStart())
+                            .build();
+                }
+                if (braceTokenPair.getRight().equals(BraceTokenTypes.TEXT_TOKEN)) {
+                    String leftText = document.getText(new TextRange(leftBraceOffset, leftBraceOffset + 1));
+                    String rightText = document.getText(new TextRange(rightBraceOffset, rightBraceOffset + 1));
+                    return new BracePair.BracePairBuilder().
+                            leftType(braceTokenPair.getLeft()).
+                            rightType(braceTokenPair.getRight()).
+                            leftText(leftText).
+                            rightText(rightText).
+                            leftOffset(leftBraceOffset).
+                            rightOffset(rightBraceOffset)
                             .build();
                 }
                 return new BracePair.BracePairBuilder().
@@ -126,7 +139,7 @@ abstract public class BraceHighlighter {
         HighlighterIterator iterator = editorHighlighter.createIterator(offset);
         IElementType type = iterator.getTokenType();
         boolean isBlockCaret = this.isBlockCaret();
-        if (!BraceMatchingUtilAdapter.isStringToken(type))
+        if (!BraceMatchingUtil.isStringToken(type))
             return EMPTY_BRACE_PAIR;
 
         int leftOffset = iterator.getStart();
@@ -140,6 +153,11 @@ abstract public class BraceHighlighter {
                 rightOffset(rightOffset).build();
     }
 
+    /**
+     * 查找符号对
+     * @param offset
+     * @return
+     */
     public BracePair findClosetBracePair(int offset) {
         BracePair braceTokenBracePair = this.findClosetBracePairInBraceTokens(offset);
         BracePair stringSymbolBracePair = this.findClosetBracePairInStringSymbols(offset);
@@ -155,6 +173,11 @@ abstract public class BraceHighlighter {
         }
     }
 
+    /**
+     * 渲染符号对
+     * @param bracePair
+     * @return
+     */
     public Pair<RangeHighlighter, RangeHighlighter> highlightPair(BracePair bracePair) {
         final Brace leftBrace = bracePair.getLeftBrace();
         final Brace rightBrace = bracePair.getRightBrace();
@@ -190,6 +213,10 @@ abstract public class BraceHighlighter {
         return new Pair<>(leftHighlighter, rightHighlighter);
     }
 
+    /**
+     * 清除渲染
+     * @param list
+     */
     public void eraseHighlight(List<RangeHighlighter> list) {
         for (RangeHighlighter l :
                 list) {

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.qeesung.component.HighlightBracketPair</id>
     <name>HighlightBracketPair</name>
-    <version>1.1.2</version>
+    <version>1.1.4</version>
     <vendor email="qeesung@live.com" url="http://qeesung.github.io">qeesung</vendor>
 
     <description><![CDATA[
@@ -25,21 +25,12 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="162.0"/>
+    <idea-version since-build="211"/>
 
-    <application-components>
-        <component>
-            <implementation-class>
-                io.github.qeesung.component.HighlightBracketPairApplicationComponent
-            </implementation-class>
-        </component>
-    </application-components>
-
-    <project-components>
-        <component>
-            <implementation-class>io.github.qeesung.component.HighlightUpdateComponent</implementation-class>
-        </component>
-    </project-components>
+    <applicationListeners>
+        <listener class="io.github.qeesung.component.ProjectOpenCloseListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
@@ -49,7 +40,10 @@
         <additionalTextAttributes scheme="Default" file="colorschemes/HighlightBracketPairDefault.xml"/>
         <applicationService
                 serviceInterface="io.github.qeesung.setting.HighlightBracketPairSettings"
-                serviceImplementation="io.github.qeesung.setting.HighlightBracketPairSettings"/>
+                serviceImplementation="io.github.qeesung.setting.HighlightBracketPairSettings" />
+        <applicationService serviceImplementation="io.github.qeesung.component.HighlightBracketPairService" />
+        <editorFactoryListener implementation="io.github.qeesung.component.HighlightBracketPairEditorFactoryListener"/>
+        <notificationGroup id="HighlightBracket update" displayType="BALLOON" />
     </extensions>
 
     <actions>

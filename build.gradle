@@ -37,7 +37,7 @@ dependencies {
 }
 
 intellij {
-    version = "IU-2021.2.1"
+    version = ideaVersion
     sandboxDir = "${project.rootDir}/sandboxDir/"
 }
 
