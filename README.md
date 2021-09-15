@@ -23,17 +23,8 @@ Supported Languages: Java, Groovy, Kotlin, Scala, Haskell, Python, JavaScript, T
 
 ### Install manually
 
-Download the plugin from [intellij plugin repository](http://plugins.jetbrains.com/plugin/10465-highlightbracketpair), and install the plugin from the disk. Access [intellij document](https://www.jetbrains.com/help/idea/installing-updating-and-uninstalling-repository-plugins.html) for more information.
+Download the plugin from [Releases](https://github.com/xsun12131/HighlightBracketPair/releases), and install the plugin from the disk. Access [intellij document](https://www.jetbrains.com/help/idea/installing-updating-and-uninstalling-repository-plugins.html) for more information.
 
-### install online
-
-goto
-
-```
-Settings > Plugins > Browse Repositories
-```
-
-then search "HighlightBracketPair" plugin.
 
 ## How to config the color and effect
 
